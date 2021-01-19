@@ -10,9 +10,10 @@ from pymavlink import mavutil
 # K64F_IP = '192.168.1.10' # Freedom K64F IP Address
 # K64F_PORT='8150'         # Freedom K64F UPD port
 # ADDRESS = 'upd:'+ K64F_IP + ':' + K64F_PORT
-connection = mavutil.mavlink_connection('udp:192.168.1.10:8150',input=False)
+connection = mavutil.mavlink_connection('udpout:192.168.1.10:8150')
+# connection_out = mavutil.mavlink_connection('udpin:192.168.1.10:8151')
 
-def callback(odom_sub):#,plan_sub):
+def mavlink_send(odom_sub):#,plan_sub):
     ### POSE DATA
     # Preparing odometry mavlink message
     time_usec = 0 
@@ -96,9 +97,10 @@ def mavlink_manager():
     # # Run callback
     # ts.registerCallback(callback)
 
-    odom_sub = rospy.Subscriber("/rtabmap/odom", Odometry, callback=callback, queue_size=1)
+    odom_sub = rospy.Subscriber("/rtabmap/odom", Odometry, callback=mavlink_send, queue_size=1)
 
     rospy.spin()
+
 
 if __name__ == '__main__':
     try:
