@@ -17,7 +17,7 @@
      <node pkg="imu_filter_madgwick" type="imu_filter_node" name="ImuFilter">
         <param name="use_mag" type="bool" value="false" />
         <param name="_publish_tf" type="bool" value="false" />
-        <param name="_world_frame" type="string" value="enu" />
+        <param name="_world_frame" type="string" value="nwu" />
         <remap from="/imu/data_raw" to="/camera/imu"/>
     </node>
 
@@ -35,7 +35,7 @@
         <arg name="approx_sync" value="true"/>
         <arg name="wait_imu_to_init" value="false"/>
         <arg name="imu_topic" value="/imu/data"/>
-        <arg name="rtabmapviz" value="true"/>
+        <arg name="rtabmapviz" value="false"/>
         <arg name="rtabmap_args" default="$(find visual_odometry)/config/config.ini"/>
         <arg name="database_path" default=""/>
         <!-- <param name="RGBD/Enabled" type="bool" value="false"/> -->
@@ -76,13 +76,13 @@
                                         false, false, false,
                                         false, false, false]</rosparam>
 
-        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
+        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
                                         true,  true,  true,  
                                         false, false, false,
                                         true,  true,  true,
                                         false,  false,  false] </rosparam>
-        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
+        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
                                         true,  true,  true,  
                                         false, false, false,
