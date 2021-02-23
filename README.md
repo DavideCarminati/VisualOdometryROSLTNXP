@@ -6,4 +6,4 @@ Used with:
 
 See rqt_graph below:
 
-![rqt_graph](./visual_odometry/visual_odometry_rqtgraph.png)
+![rqt_graph](visual_odometry_rqtgraph.png)
