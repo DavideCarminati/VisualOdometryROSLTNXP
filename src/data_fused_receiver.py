@@ -46,15 +46,18 @@ def mavlink_receiver():
         imu = connection_in.recv_match(type='SCALED_IMU', blocking=True)
         imu_ros = Imu()
         imu_ros.header.stamp = current_time
-        imu_ros.header.frame_id = "odom"
-        imu_ros.linear_acceleration.x = -imu.xacc/1000
-        imu_ros.linear_acceleration.y = imu.yacc/1000
-        imu_ros.linear_acceleration.z = -imu.zacc/1000
-        imu_ros.orientation.z = imu.zmag
-        imu_ros.orientation.w = sqrt(1-imu.zmag**2)
+        imu_ros.header.frame_id = "odom"  # odom before
+        imu_ros.linear_acceleration.x = imu.xacc/1000*9.81
+        imu_ros.linear_acceleration.y = imu.yacc/1000*9.81
+        imu_ros.linear_acceleration.z = imu.zacc/1000*9.81
+        imu_ros.linear_acceleration_covariance[0] = imu.xmag/10**7
+        imu_ros.linear_acceleration_covariance[4] = imu.ymag/10**7
+        imu_ros.linear_acceleration_covariance[8] = imu.xgyro/10**7
+        imu_ros.orientation.z = imu.zmag/1000
+        imu_ros.orientation.w = sqrt(1-(imu.zmag/1000)**2)
         imu_ros.orientation.x = 0
         imu_ros.orientation.y = 0
-        # TODO inserire covarianza nel messaggio ros
+        imu_ros.orientation_covariance[8] = imu.ygyro/10**5
         pub_imu.publish(imu_ros)
 
         encoders = connection_in.recv_match(type='WHEEL_DISTANCE', blocking=True) # connection_in.messages['Odometry']
