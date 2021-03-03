@@ -1,0 +1,15 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/lattepanda/catkin_ws/devel/lib/python3/dist-packages",
+        "/home/lattepanda/lattepanda_behaviours/behaviour_ros/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/home/lattepanda/librealsense/build/wrappers/python"
+    ],
+    "cmake.configureOnOpen": false,
+    "python.analysis.extraPaths": [
+        "/home/lattepanda/catkin_ws/devel/lib/python3/dist-packages",
+        "/home/lattepanda/lattepanda_behaviours/behaviour_ros/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/home/lattepanda/librealsense/build/wrappers/python"
+    ]
+}

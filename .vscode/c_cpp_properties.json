@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/lattepanda/catkin_ws/devel/include/**",
+        "/home/lattepanda/lattepanda_behaviours/behaviour_ros/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/lattepanda/lattepanda_behaviours/behaviour_ros/src/mavlink_manager/include/**",
+        "/home/lattepanda/lattepanda_behaviours/behaviour_ros/src/rcb_package/include/**",
+        "/home/lattepanda/catkin_ws/src/realsense-ros/realsense2_camera/include/**",
+        "/home/lattepanda/catkin_ws/src/visual_odometry/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}
