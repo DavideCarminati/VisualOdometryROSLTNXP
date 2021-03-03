@@ -33,7 +33,7 @@
         <arg name="rtabmap_args" default="$(find visual_odometry)/config/config.ini"/>
         <!-- <param name="RGBD/Enabled" type="bool" value="false"/> -->
     </include>
-    <!-- <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" /> -->
+    <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" />
 </launch>
  <!-- /camera/rgb/image_rect_color \ -->
    <!-- /camera/depth_registered/image_raw \ -->

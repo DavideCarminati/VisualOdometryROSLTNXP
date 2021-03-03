@@ -96,7 +96,7 @@ def mavlink_manager():
     # # Run callback
     # ts.registerCallback(callback)
 
-    odom_sub = rospy.Subscriber("odom", Odometry, callback=callback, queue_size=1)
+    odom_sub = rospy.Subscriber("/rtabmap/odom", Odometry, callback=callback, queue_size=1)
 
     rospy.spin()
 
