@@ -3,7 +3,11 @@
 import rospy
 import message_filters
 from nav_msgs.msg import Odometry
+from sensor_msgs.msg import Imu
 import time
+import rosbag
+import bagpy
+from bagpy import bagreader
 import os
 os.environ['MAVLINK20']='1' # set mavlink2 for odometry message
 from pymavlink import mavutil
@@ -13,13 +17,15 @@ from pymavlink import mavutil
 connection = mavutil.mavlink_connection('udpout:192.168.1.10:8150')
 # connection_out = mavutil.mavlink_connection('udpin:192.168.1.10:8151')
 
-def mavlink_send(odom_sub):#,plan_sub):
+# odom_bag = rosbag.Bag('~/Desktop/odom.bag', 'w')
+
+def mavlink_send(odom_sub):#, imu_sub):#,plan_sub):
     ### POSE DATA
     # Preparing odometry mavlink message
     time_usec = 0 
     frame_id = 0
     child_frame_id = 0
-    # Postion
+    # Position
     x = odom_sub.pose.pose.position.x
     y = odom_sub.pose.pose.position.y
     z = odom_sub.pose.pose.position.z
@@ -51,6 +57,10 @@ def mavlink_send(odom_sub):#,plan_sub):
                                 rollspeed,pitchspeed,yawspeed,\
                                 pose_covariance,velocity_covariance,\
                                 reset_counter,estimator_type)
+
+    
+    # odom_bag.write('/odomoetry/filtered', odom_sub)
+
     # ### PLANNER DATA
     # # Preparing set_position_target mavlink message
     # time_boot_ms = 0
@@ -84,6 +94,27 @@ def mavlink_send(odom_sub):#,plan_sub):
     #                                                   afx,afy,afz,\
     #                                                   yaw,yaw_rate)
 
+#   # Preparing IMU mavlink message
+#     time_usec = 0 
+#     frame_id = 0
+#     child_frame_id = 0
+#     # Linear acceleration
+#     ax = imu_sub.linear_acceleration.x
+#     ay = imu_sub.linear_acceleration.y
+#     az = imu_sub.linear_acceleration.z
+#     # Quaternion
+#     q = [imu_sub.orientation.w,imu_sub.orientation.x,imu_sub.orientation.y,imu_sub.orientation.z]
+#         # Angular velocity
+#     rollspeed = odom_sub.angular_velocity.x
+#     pitchspeed = odom_sub.angular_velocity.y
+#     yawspeed = odom_sub.angular_velocity.z
+#     # The following fields are not used
+#     reset_counter = 0
+#     estimator_type = 0
+#     # Send IMU mavlink message
+#     connection.mav.imu_send(time_usec,frame_id,child_frame_id, ax, ay, az,q, rollspeed,pitchspeed,yawspeed,reset_counter,estimator_type)                      
+
+                                 
 
 def mavlink_manager():
     rospy.init_node('mavlink_manager', anonymous=True)
@@ -97,8 +128,9 @@ def mavlink_manager():
     # # Run callback
     # ts.registerCallback(callback)
 
-    odom_sub = rospy.Subscriber("/rtabmap/odom", Odometry, callback=mavlink_send, queue_size=1)
-
+    odom_sub = rospy.Subscriber("/odometry/filtered", Odometry, callback=mavlink_send, queue_size=1)
+    # imu_sub =rospy.Subscriber("/imu/data", Imu, callback=mavlink_send, queue_size=1)
+    
     rospy.spin()
 
 
