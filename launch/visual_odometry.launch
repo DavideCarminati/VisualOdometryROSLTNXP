@@ -103,14 +103,14 @@
         
         
         <param name="odom0_differential" value="false"/>
-        <param name="imu0_differential" value="false"/>
         <param name="odom1_differential" value="true"/>
+        <param name="imu0_differential" value="false"/>
         <param name="imu1_differential" value="false"/>
 
         <param name="odom0_relative" value="true"/>
-        <param name="imu0_relative" value="true"/>
         <param name="odom1_relative" value="true"/>
-        <param name="imu1_relative" value="true"/>
+        <param name="imu0_relative" value="true"/>
+        <param name="imu1_relative" value="true"/> 
 
         <param name="imu0_remove_gravitational_acceleration" value="$(arg imu_remove_gravitational_acceleration)"/>
         <param name="imu1_remove_gravitational_acceleration" value="true"/>
@@ -119,8 +119,8 @@
 
         <!-- ======== ADVANCED PARAMETERS ======== -->
         <param name="odom0_queue_size" value="5"/>
+        <param name="odom1_queue_size" value="10"/>
         <param name="imu0_queue_size" value="50"/>
-        <param name="odom1_queue_size" value="10"/> 
         <param name="imu1_queue_size" value="50"/>
 
         <!-- The values are ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, 
