@@ -60,6 +60,7 @@
 
         <param name="odom0" value="/rtabmap/odom"/>
         <param name="odom1" value="/encoder"/>
+        <param name="odom2" value="/magnetometer"/>
         <param name="imu0" value="$(arg imu_topic)"/> 
         <param name="imu1" value="/imu_k64"/>
         <!-- <param name="imu2" value="/imu_ext"/> External IMU  -->
@@ -76,6 +77,12 @@
         <!-- Encoders -->
         <rosparam param="odom1_config">[true, true, false,
                                         false, false, false,
+                                        false, false, false,
+                                        false, false, false,
+                                        false, false, false]</rosparam>
+        
+        <rosparam param="odom2_config">[false, false, false,
+                                        true, true,true,
                                         false, false, false,
                                         false, false, false,
                                         false, false, false]</rosparam>
@@ -96,15 +103,15 @@
                                         true,  false,  true] </rosparam>
 
         <!-- Freedom IMU -->
-        <rosparam     if="$(arg imu_ignore_acc)" param="imu1_config">[
+        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
-                                        true,  true,  true, 
+                                        false,false,false, 
                                         false, false, false,
                                         false,  false,  false,
                                         false,  false,  false] </rosparam>
-        <rosparam unless="$(arg imu_ignore_acc)" param="imu1_config">[
+        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
-                                        true,  true,  true,  
+                                        false,false,false,  
                                         false, false, false,
                                         false,  false,  false,
                                         true,  false,  true] </rosparam>  
@@ -126,17 +133,18 @@
         
         <param name="odom0_differential" value="false"/>  <!-- Realsense Images -->
         <param name="odom1_differential" value="true"/>   <!-- Encoders -->
+        <param name="odom2_differential" value="false"/>   <!-- Encoders -->
         <param name="imu0_differential" value="false"/>   <!-- Realsense IMU -->
         <param name="imu1_differential" value="false"/>   <!-- Freedom IMU -->
         <!-- <param name="imu2_differential" value="false"/>   Ext IMU -->
 
         <param name="odom0_relative" value="true"/>  <!-- Realsense Images-->
         <param name="odom1_relative" value="true"/>  <!-- Encoders -->
+        <param name="odom2_relative" value="true"/>  <!-- Encoders -->
         <param name="imu0_relative" value="true"/>   <!-- Realsense IMU-->
         <param name="imu1_relative" value="true"/>   <!-- Freedom IMU-->
         <!-- <param name="imu2_relative" value="true"/>   Ext IMU -->
 
-        <!-- Is this right?  -->
         <!-- # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
         # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame. -->
         <param name="imu0_remove_gravitational_acceleration" value="$(arg imu_remove_gravitational_acceleration)"/>
@@ -148,6 +156,7 @@
         <!-- ======== ADVANCED PARAMETERS ======== -->
         <param name="odom0_queue_size" value="5"/>
         <param name="odom1_queue_size" value="10"/>
+        <param name="odom2_queue_size" value="50"/>
         <param name="imu0_queue_size" value="50"/>
         <param name="imu1_queue_size" value="50"/>
         <!-- <param name="imu2_queue_size" value="50"/> -->

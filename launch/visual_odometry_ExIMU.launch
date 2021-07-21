@@ -46,7 +46,7 @@
 <!-- UNTIL HERE -->
 
     <!-- Odometry fusion (EKF), refer to demo launch file in robot_localization for more info -->
-    <arg name="frame_id"                default="whatever" />
+    <arg name="frame_id"                default="/myrobot" />
     <arg name="imu_topic"               default="/imu/data" />
     <arg name="imu_ignore_acc"          default="false" />
     <arg name="imu_remove_gravitational_acceleration" default="true" />
@@ -65,6 +65,7 @@
 
         <!-- <param name="odom0" value="/rtabmap/odom"/> -->
         <param name="odom0" value="/encoder"/>
+        <param name="odom1" value="/magnetometer"/>
         <!-- <param name="imu0" value="$(arg imu_topic)"/>  -->
         <param name="imu0" value="/imu_k64"/>
         <param name="imu1" value="/imu_ext"/> <!-- External IMU --> 
@@ -87,6 +88,12 @@
                                         false, false, false,
                                         false, false, false]</rosparam>
 
+        <rosparam param="odom1_config">[false, false, false,
+                                        true, true,true,
+                                        false, false, false,
+                                        false, false, false,
+                                        false, false, false]</rosparam>
+
         <!-- Realsense IMU  -->
         <!-- <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
@@ -105,13 +112,13 @@
         <!-- Freedom IMU -->
         <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
-                                        true,  true,  true, 
+                                        false,false,false, 
                                         false, false, false,
                                         false,  false,  false,
                                         false,  false,  false] </rosparam>
         <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
-                                        true,  true,  true,  
+                                        false,false,false,  
                                         false, false, false,
                                         false,  false,  false,
                                         true,  false,  true] </rosparam>  
@@ -132,12 +139,14 @@
         
         
         <!-- <param name="odom0_differential" value="false"/>  Realsense Images -->
-        <param name="odom0_differential" value="true"/>   <!-- Encoders -->
+        <param name="odom0_differential" value="false"/>   <!-- Encoders -->
+        <param name="odom1_differential" value="false"/>   <!-- Magnetometer -->
         <param name="imu0_differential" value="false"/>   <!-- Realsense IMU -->
         <param name="imu1_differential" value="false"/>   <!-- Freedom IMU -->
         <!-- <param name="imu2_differential" value="false"/>   Ext IMU -->
 
         <param name="odom0_relative" value="true"/>  <!-- Realsense Images-->
+        <param name="odom1_relative" value="true"/>  <!-- Magnetometer-->
         <!-- <param name="odom1_relative" value="true"/>  Encoders -->
         <param name="imu0_relative" value="true"/>   <!-- Realsense IMU-->
         <param name="imu1_relative" value="true"/>   <!-- Freedom IMU-->
@@ -155,6 +164,7 @@
         <!-- ======== ADVANCED PARAMETERS ======== -->
         <!-- <param name="odom0_queue_size" value="5"/> -->
         <param name="odom0_queue_size" value="10"/>
+        <param name="odom1_queue_size" value="50"/>
         <param name="imu0_queue_size" value="50"/>
         <param name="imu1_queue_size" value="50"/>
         <!-- <param name="imu2_queue_size" value="50"/> -->
@@ -179,21 +189,21 @@
 
         <!-- The values are ordered as x, y,
             z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. -->
-        <rosparam param="initial_estimate_covariance">[1, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    1, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    1, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    1, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    1, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    1, 0,    0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    1, 0,    0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    1, 0,    0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    1, 0,     0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    1,  0,     0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1,  0,     0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1,  0,    0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1, 0,    0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1, 0,
-                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1]</rosparam>
+        <rosparam param="initial_estimate_covariance">[1e-9, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    1e-9, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1e-9,  0,    0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9, 0,    0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
+                                                        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]</rosparam>
 
     </node>
     <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" output="screen" />
