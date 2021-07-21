@@ -75,14 +75,15 @@
                                         false, false, false,
                                         false, false, false,
                                         false, false, false]</rosparam>
-
-        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
+                                        
+        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
                                         true,  true,  true,  
                                         false, false, false,
                                         true,  true,  true,
                                         false,  false,  false] </rosparam>
-        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
+                                        
+        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
                                         true,  true,  true,  
                                         false, false, false,
