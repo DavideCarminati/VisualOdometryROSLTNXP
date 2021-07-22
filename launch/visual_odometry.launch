@@ -64,30 +64,32 @@
         <param name="imu1" value="/imu_k64"/>
 
         <!-- The order of the values is x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. -->
+        <!-- Realsense images -->
         <rosparam param="odom0_config">[true, true, true,
                                         false, false, false,
                                         true, true, true,
                                         false, false, false,
                                         false, false, false]</rosparam>
-
+        <!-- Encoders -->
         <rosparam param="odom1_config">[true, true, false,
                                         false, false, false,
                                         false, false, false,
                                         false, false, false,
                                         false, false, false]</rosparam>
-
-        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[
+        <!-- Realsense IMU  -->
+        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
                                         false, false, false,
                                         true,  true,  true,  
                                         false, false, false,
                                         true,  true,  true,
                                         false,  false,  false] </rosparam>
-        <rosparam     if="$(arg imu_ignore_acc)" param="imu0_config">[
+        <rosparam unless="$(arg imu_ignore_acc)" param="imu0_config">[                                        
                                         false, false, false,
                                         true,  true,  true,  
                                         false, false, false,
                                         false,  false,  false,
                                         true,  false,  true] </rosparam>  
+        <!-- Freedom IMU -->
         <rosparam     if="$(arg imu_ignore_acc)" param="imu1_config">[
                                         false, false, false,
                                         true,  true,  true, 
@@ -102,16 +104,19 @@
                                         true,  false,  true] </rosparam>  
         
         
-        <param name="odom0_differential" value="false"/>
-        <param name="odom1_differential" value="true"/>
-        <param name="imu0_differential" value="false"/>
-        <param name="imu1_differential" value="false"/>
+        <param name="odom0_differential" value="false"/>  <!-- Realsense Images -->
+        <param name="odom1_differential" value="true"/>   <!-- Encoders -->
+        <param name="imu0_differential" value="false"/>   <!-- Realsense IMU -->
+        <param name="imu1_differential" value="false"/>   <!-- Freedom IMU -->
 
-        <param name="odom0_relative" value="true"/>
-        <param name="odom1_relative" value="true"/>
-        <param name="imu0_relative" value="true"/>
-        <param name="imu1_relative" value="true"/> 
+        <param name="odom0_relative" value="true"/>  <!-- Realsense Images-->
+        <param name="odom1_relative" value="true"/>  <!-- Encoders -->
+        <param name="imu0_relative" value="true"/>   <!-- Realsense IMU-->
+        <param name="imu1_relative" value="true"/>   <!-- Freedom IMU-->
 
+        <!-- Is this right?  -->
+        <!-- # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
+        # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame. -->
         <param name="imu0_remove_gravitational_acceleration" value="$(arg imu_remove_gravitational_acceleration)"/>
         <param name="imu1_remove_gravitational_acceleration" value="true"/>
 
