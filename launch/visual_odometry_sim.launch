@@ -1,9 +1,18 @@
 <!-- Usare questo -->
 <launch>
-    <remap from="/camera/color/image_raw" to="/camera/rgb/image_rect_color"/>
-    <remap from="/camera/depth/image_rect_raw" to="/camera/depth_registered/image_raw"/>
-    <remap from="/camera/color/camera_info" to="/camera/rgb/camera_info"/>
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <!-- <remap from="/camera/rgb/image_rect_color" to="/camera/color/image_raw"/>
+    <remap from="/camera/depth_registered/image_raw" to="/camera/depth/image_raw"/>
+    <remap from="/camera/color/camera_info" to="/camera/rgb/camera_info"/> -->
+
+    <!-- <remap from="/camera/color/image_raw" to="/camera/color/image_raw"/>
+    <remap from="/camera/depth/image_rect_raw" to="/camera/depth/image_raw"/>
+    <remap from="/camera/color/camera_info" to="/camera/color/camera_info"/> -->
+
+    <remap from="rgb/image"       to="/camera/color/image_raw"/>
+    <remap from="depth/image"     to="/camera/depth/image_raw"/>
+    <remap from="rgb/camera_info" to="/camera/color/camera_info"/>
+    
+    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="color_fps" value="15"/>
         <arg name="enable_accel" value="true"/>
         <arg name="enable_gyro" value="true"/>
@@ -13,12 +22,12 @@
         <arg name="color_height" value="240"/>
         <arg name="depth_width" value="424"/>
         <arg name="depth_height" value="240"/>
-    </include>
-     <node pkg="imu_filter_madgwick" type="imu_filter_node" name="ImuFilter">
+    </include> -->
+    <node pkg="imu_filter_madgwick" type="imu_filter_node" name="ImuFilter">
         <param name="use_mag" type="bool" value="false" />
         <param name="_publish_tf" type="bool" value="false" />
         <param name="_world_frame" type="string" value="nwu" />
-        <remap from="/imu/data_raw" to="/camera/imu"/>
+        <!-- <remap from="/imu/data_raw" to="/imu/filtered"/> -->
     </node>
 
     <!-- <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap">
@@ -34,15 +43,23 @@
     <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
         <arg name="approx_sync" value="true"/>
         <arg name="wait_imu_to_init" value="false"/>
-        <arg name="imu_topic" value="/imu/data"/>
+        <arg name="imu_topic" value="/imu/filtered"/>
         <arg name="rtabmapviz" value="false"/>
         <arg name="rtabmap_args" default="$(find visual_odometry)/config/config.ini"/>
         <arg name="database_path" default=""/>
         <!-- <param name="RGBD/Enabled" type="bool" value="false"/> -->
     </include>
+    <!-- <node name="rtabmap" pkg="rgbd_odometry" type="rgbd_odometry" output="screen">
+        <param name="frame_id"            type="string" value="origin"/>
+        <param name="approx_sync"        type="bool" value="false"/> 
+
+        <remap from="rgb/image"       to="/realsense/camera/color/image_raw"/>
+        <remap from="depth/image"     to="/realsense/camera/depth/image_raw"/>
+        <remap from="rgb/camera_info" to="/realsense/camera/color/camera_info"/>
+    </node> -->
     <!-- Odometry fusion (EKF), refer to demo launch file in robot_localization for more info -->
-    <arg name="frame_id"                default="camera_link" />
-    <arg name="imu_topic"               default="/imu/data" />
+    <arg name="frame_id"                default="RealSense" />
+    <arg name="imu_topic"               default="/imu/filtered" />
     <arg name="imu_ignore_acc"          default="false" />
     <arg name="imu_remove_gravitational_acceleration" default="true" />
 
@@ -59,9 +76,9 @@
         <param name="transform_time_offset" value="0.0"/>
 
         <param name="odom0" value="/rtabmap/odom"/>
-        <param name="odom1" value="/encoder"/>
+        <param name="odom1" value="/odom"/>
         <param name="imu0" value="$(arg imu_topic)"/> 
-        <param name="imu1" value="/imu_k64"/>
+        <!-- <param name="imu1" value="/imu_k64"/> -->
 
         <!-- The order of the values is x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az. -->
         <!-- Realsense images -->
@@ -90,7 +107,7 @@
                                         false,  false,  false,
                                         true,  false,  true] </rosparam>  
         <!-- Freedom IMU -->
-        <rosparam     if="$(arg imu_ignore_acc)" param="imu1_config">[
+        <!-- <rosparam     if="$(arg imu_ignore_acc)" param="imu1_config">[
                                         false, false, false,
                                         true,  true,  true, 
                                         false, false, false,
@@ -101,24 +118,24 @@
                                         true,  true,  true,  
                                         false, false, false,
                                         false,  false,  false,
-                                        true,  false,  true] </rosparam>  
+                                        true,  false,  true] </rosparam>   -->
         
         
         <param name="odom0_differential" value="false"/>  <!-- Realsense Images -->
         <param name="odom1_differential" value="true"/>   <!-- Encoders -->
         <param name="imu0_differential" value="false"/>   <!-- Realsense IMU -->
-        <param name="imu1_differential" value="false"/>   <!-- Freedom IMU -->
+        <!--<param name="imu1_differential" value="false"/>    Freedom IMU -->
 
         <param name="odom0_relative" value="true"/>  <!-- Realsense Images-->
         <param name="odom1_relative" value="true"/>  <!-- Encoders -->
         <param name="imu0_relative" value="true"/>   <!-- Realsense IMU-->
-        <param name="imu1_relative" value="true"/>   <!-- Freedom IMU-->
+        <!--<param name="imu1_relative" value="true"/>    Freedom IMU-->
 
         <!-- Is this right?  -->
         <!-- # [ADVANCED] Some IMUs automatically remove acceleration due to gravity, and others don't. If yours doesn't, please set
         # this to true, and *make sure* your data conforms to REP-103, specifically, that the data is in ENU frame. -->
         <param name="imu0_remove_gravitational_acceleration" value="$(arg imu_remove_gravitational_acceleration)"/>
-        <param name="imu1_remove_gravitational_acceleration" value="true"/>
+        <!-- <param name="imu1_remove_gravitational_acceleration" value="true"/> -->
 
         <param name="print_diagnostics" value="true"/>
 
@@ -126,7 +143,7 @@
         <param name="odom0_queue_size" value="5"/>
         <param name="odom1_queue_size" value="10"/>
         <param name="imu0_queue_size" value="50"/>
-        <param name="imu1_queue_size" value="50"/>
+        <!-- <param name="imu1_queue_size" value="50"/> -->
 
         <!-- The values are ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, 
             vroll, vpitch, vyaw, ax, ay, az. --> 
@@ -165,8 +182,8 @@
                                                             0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1]</rosparam>
 
     </node>
-    <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" />
-    <node name="data_fused_receiver" pkg="visual_odometry" type="data_fused_receiver.py"/>
+    <!-- <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" /> -->
+    <!-- <node name="data_fused_receiver" pkg="visual_odometry" type="data_fused_receiver.py"/> -->
     <node name="odometry_bag" pkg="rosbag" type="record" args="-O $(find visual_odometry)/bags/odom_bag.bag /odometry/filtered /imu_k64 /encoder"/>
     
 </launch>
