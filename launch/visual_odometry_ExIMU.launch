@@ -196,8 +196,8 @@
                                                         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1]</rosparam>
 
     </node>
-    <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" />
-    <node name="data_fused_receiver" pkg="visual_odometry" type="data_fused_receiver.py"/>
+    <node name="vo_sender" pkg="visual_odometry" type="vo_sender.py" output="screen" />
+    <node name="data_fused_receiver" pkg="visual_odometry" type="data_fused_receiver.py" output="screen"/>
     <!-- <node name="data_ExIMU" pkg="visual_odometry" type="data_ExIMU.py"/> -->
     <!-- <node name="odometry_bag" pkg="rosbag" type="record" args="-O $(find visual_odometry)/bags/odom_bag.bag /odometry/filtered /imu_k64 /encoder"/> -->
     

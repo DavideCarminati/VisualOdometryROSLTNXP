@@ -36,11 +36,11 @@ def mavlink_receiver():
     #     pub.publish(ekf_data_fused_ros)
     #     rate.sleep()
 
-    pub_enc = rospy.Publisher('encoder', Odometry, queue_size=10)
+    # pub_enc = rospy.Publisher('encoder', Odometry, queue_size=10)
     pub_imu = rospy.Publisher('imu_k64', Imu, queue_size=10)
-    # pub_imu2 = rospy.Publisher('imu_ext', Imu, queue_size=10)
+    pub_imu2 = rospy.Publisher('imu_ext', Imu, queue_size=10)
     rospy.init_node('mavlink_manager_in', anonymous=True)
-    rate = rospy.Rate(5) # 10hz
+    rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         current_time = rospy.Time.now()
         imu = connection_in.recv_match(type='SCALED_IMU', blocking=True)
@@ -63,33 +63,36 @@ def mavlink_receiver():
         print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA')
 
         
-        # imu_ex = connection_in.recv_match(type='SCALED_IMU2', blocking=True)
-        # imu_ros2 = Imu()
-        # imu_ros2.header.stamp = current_time
-        # imu_ros2.header.frame_id = "odom"  # odom before
-        # imu_ros2.linear_acceleration.x = imu_ex.xacc/1000*9.81
-        # imu_ros2.linear_acceleration.y = imu_ex.yacc/1000*9.81
-        # imu_ros2.linear_acceleration.z = imu_ex.zacc/1000*9.81
-        # imu_ros2.linear_acceleration_covariance[0] = 0
-        # imu_ros2.linear_acceleration_covariance[4] = 0
-        # imu_ros2.linear_acceleration_covariance[8] = 0
-        # imu_ros2.orientation.z = imu_ex.zmag/10000
-        # imu_ros2.orientation.w = 0
-        # imu_ros2.orientation.x = imu_ex.xmag/10000
-        # imu_ros2.orientation.y = imu_ex.ymag/10000
-        # imu_ros2.orientation_covariance[8] = 0
-        # pub_imu2.publish(imu_ros2)
+        imu_ex = connection_in.recv_match(type='SCALED_IMU2', blocking=True)
+        imu_ros2 = Imu()
+        imu_ros2.header.stamp = current_time
+        imu_ros2.header.frame_id = "odom"  # odom before
+        imu_ros2.linear_acceleration.x = imu_ex.xacc/1000*9.81
+        imu_ros2.linear_acceleration.y = imu_ex.yacc/1000*9.81
+        imu_ros2.linear_acceleration.z = imu_ex.zacc/1000*9.81
+        imu_ros2.linear_acceleration_covariance[0] = 0
+        imu_ros2.linear_acceleration_covariance[4] = 0
+        imu_ros2.linear_acceleration_covariance[8] = 0
+        imu_ros2.angular_velocity.z = imu_ex.zgyro/1000 # degrees/second?
+        imu_ros2.angular_velocity.x = imu_ex.xgyro/1000 # degrees/second?
+        imu_ros2.angular_velocity.y = imu_ex.ygyro/1000 # degrees/second?
+        imu_ros2.orientation.z = 0
+        imu_ros2.orientation.w = 0
+        imu_ros2.orientation.x = 0
+        imu_ros2.orientation.y = 0
+        imu_ros2.orientation_covariance[8] = 0
+        pub_imu2.publish(imu_ros2)
 
-        encoders = connection_in.recv_match(type='WHEEL_DISTANCE', blocking=True) # connection_in.messages['Odometry']
-        # print(connection_in)
-        encoders_ros = Odometry()
-        encoders_ros.header.stamp = current_time
-        encoders_ros.header.frame_id = "odom"
-        rot = R.from_quat([0, 0, imu.zmag, imu_ros.orientation.w])
-        [psi,_,_] = rot.as_euler("zyx", degrees = False)
-        encoders_ros.pose.pose.position.x = (encoders.distance[0]+encoders.distance[1])/2*cos(psi)
-        encoders_ros.pose.pose.position.y = (encoders.distance[0]+encoders.distance[1])/2*sin(psi)
-        pub_enc.publish(encoders_ros)
+        # encoders = connection_in.recv_match(type='WHEEL_DISTANCE', blocking=True) # connection_in.messages['Odometry']
+        # # print(connection_in)
+        # encoders_ros = Odometry()
+        # encoders_ros.header.stamp = current_time
+        # encoders_ros.header.frame_id = "odom"
+        # rot = R.from_quat([0, 0, imu.zmag, imu_ros.orientation.w])
+        # [psi,_,_] = rot.as_euler("zyx", degrees = False)
+        # encoders_ros.pose.pose.position.x = (encoders.distance[0]+encoders.distance[1])/2*cos(psi)
+        # encoders_ros.pose.pose.position.y = (encoders.distance[0]+encoders.distance[1])/2*sin(psi)
+        # pub_enc.publish(encoders_ros)
         rate.sleep()
 
 if __name__ == '__main__':
