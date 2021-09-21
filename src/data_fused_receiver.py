@@ -42,7 +42,7 @@ def mavlink_receiver():
     pub_imu = rospy.Publisher('imu_k64', Imu, queue_size=10)
     pub_imu2 = rospy.Publisher('imu_ext', Imu, queue_size=10)
     rospy.init_node('mavlink_manager_in', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
+    rate = rospy.Rate(20) # 10hz
     while not rospy.is_shutdown():
         current_time = rospy.Time.now()
         imu = connection_in.recv_match(type='SCALED_IMU', blocking=True)
