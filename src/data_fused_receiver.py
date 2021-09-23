@@ -46,6 +46,8 @@ def mavlink_receiver():
     global pos_r_old
     global pos_r_new
     global psi_old
+    global oldT
+    oldT = 0
     pos_l_old = 0
     pos_l_new = 0
     pos_r_old = 0
@@ -111,11 +113,11 @@ def mavlink_receiver():
         pub_imu2.publish(imu_ros2)
 
         encoders = connection_in.recv_match(type='WHEEL_DISTANCE', blocking=True) # connection_in.messages['Odometry']
-        # print(connection_in)
-        if pos_l_old== 0:
-            pos_l_old = encoders.distance[0]
-            pos_r_old = encoders.distance[1]
-            psi_old = 0
+        # # print(connection_in)
+        # if pos_l_old== 0:
+        #     pos_l_old = encoders.distance[0]
+        #     pos_r_old = encoders.distance[1]
+        #     psi_old = 0
             
         encoders_ros = Odometry()
         encoders_ros.header.stamp = current_time
@@ -126,19 +128,28 @@ def mavlink_receiver():
         # Integration of psi based on encoder positions
         pos_l_new = encoders.distance[0]
         pos_r_new = encoders.distance[1]
+        # currentT = (float)encoders_ros.header.stamp
+        # deltaT = currentT - oldT
+        # oldT = currentT
         deltaPos_l = pos_l_new-pos_l_old
         deltaPos_r = pos_r_new-pos_r_old
         psi_new = psi_old + (1/B)*(deltaPos_r-deltaPos_l)  # Rad
+        VR = deltaPos_r
+        VL = deltaPos_l
         pos_l_old = pos_l_new
         pos_r_old = pos_r_new
         psi_old = psi_new
 
-        if (x_0 == 0) and (y_0 == 0):
-            x_0 = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new)
-            y_0 = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new)
+        # if (x_0 == 0) and (y_0 == 0):
+        #     x_0 = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new)
+        #     y_0 = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new)
 
-        encoders_ros.pose.pose.position.x = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new) #-x_0
-        encoders_ros.pose.pose.position.y = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new) #-y_0
+        # encoders_ros.pose.pose.position.x = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new) #-x_0
+        # encoders_ros.pose.pose.position.y = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new) #-y_0
+        encoders_ros.pose.pose.position.x = x_0 + (VR+VL)/2*cos(psi_new)
+        encoders_ros.pose.pose.position.y = y_0 + (VR+VL)/2*sin(psi_new)
+        x_0 = encoders_ros.pose.pose.position.x
+        y_0 = encoders_ros.pose.pose.position.y
         print('Psi value from frdm', psi_new*180/pi, encoders_ros.pose.pose.position.x, encoders_ros.pose.pose.position.y, (encoders.distance[0]+encoders.distance[1]), x_0, y_0)
         # encoders_ros.pose.pose.position.y = 0
         pub_enc.publish(encoders_ros)
