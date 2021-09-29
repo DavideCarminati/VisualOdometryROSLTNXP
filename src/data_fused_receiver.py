@@ -62,6 +62,51 @@ def mavlink_receiver():
     rate = rospy.Rate(20) # 10hz
     while not rospy.is_shutdown():
         current_time = rospy.Time.now()
+        
+        
+        #  ENCODERS #
+        encoders = connection_in.recv_match(type='WHEEL_DISTANCE', blocking=True) # connection_in.messages['Odometry']            
+        encoders_ros = Odometry()
+        encoders_ros.header.stamp = current_time
+        encoders_ros.header.frame_id = "odom"
+        rot = R.from_quat([0, 0, magneto_ros.pose.pose.orientation.z, magneto_ros.pose.pose.orientation.w])
+        [psi,_,_] = rot.as_euler("zyx", degrees = False)
+        
+        # Integration of psi based on encoder positions
+        pos_l_new = encoders.distance[0]
+        pos_r_new = encoders.distance[1]
+        
+        # IF THE SWITCH IS OFF, RESET POSITION OF ENCODERS AND FILTER
+        if (pos_l_new and pos_r_new) == 0:
+            pos_l_old = 0
+            pos_r_old = 0
+            psi_old = 0
+            x_0 = 0
+            y_0 = 0
+        deltaPos_l = pos_l_new-pos_l_old
+        deltaPos_r = pos_r_new-pos_r_old
+        psi_new = psi_old + (1/B)*(deltaPos_r-deltaPos_l)  # Rad
+        VR = deltaPos_r
+        VL = deltaPos_l
+        pos_l_old = pos_l_new
+        pos_r_old = pos_r_new
+        psi_old = psi_new
+
+        # if (x_0 == 0) and (y_0 == 0):
+        #     x_0 = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new)
+        #     y_0 = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new)
+
+        # encoders_ros.pose.pose.position.x = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new) #-x_0
+        # encoders_ros.pose.pose.position.y = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new) #-y_0
+        encoders_ros.pose.pose.position.x = x_0 + (VR+VL)/2*cos(psi_new)
+        encoders_ros.pose.pose.position.y = y_0 + (VR+VL)/2*sin(psi_new)
+        x_0 = encoders_ros.pose.pose.position.x
+        y_0 = encoders_ros.pose.pose.position.y
+        print('Psi value from frdm', psi_new*180/pi, encoders_ros.pose.pose.position.x, encoders_ros.pose.pose.position.y, (encoders.distance[0]+encoders.distance[1]), x_0, y_0)
+        pub_enc.publish(encoders_ros)
+        
+        
+        # IMU K64F #
         imu = connection_in.recv_match(type='SCALED_IMU', blocking=True)
         imu_ros = Imu()
         imu_ros.header.stamp = current_time
@@ -72,10 +117,6 @@ def mavlink_receiver():
         imu_ros.linear_acceleration_covariance[0] = imu.xmag/10**7
         imu_ros.linear_acceleration_covariance[4] = imu.ymag/10**7
         imu_ros.linear_acceleration_covariance[8] = imu.xgyro/10**7
-        # imu_ros.orientation.z = imu.zmag/10000
-        # imu_ros.orientation.w = sqrt(1-(imu.zmag/10000)**2)
-        # imu_ros.orientation.x = 0
-        # imu_ros.orientation.y = 0
         imu_ros.orientation_covariance[8] = imu.ygyro/10**5
         pub_imu.publish(imu_ros)
         # rospy.loginfo("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -90,6 +131,7 @@ def mavlink_receiver():
         magneto_ros.pose.pose.orientation.y = 0
         pub_mag.publish(magneto_ros)
         
+        # IMU EXT #
         imu_ex = connection_in.recv_match(type='SCALED_IMU2', blocking=True)
         imu_ros2 = Imu()
         imu_ros2.header.stamp = current_time
@@ -112,47 +154,7 @@ def mavlink_receiver():
         imu_ros2.angular_velocity_covariance[8] = 2.6/10000
         pub_imu2.publish(imu_ros2)
 
-        encoders = connection_in.recv_match(type='WHEEL_DISTANCE', blocking=True) # connection_in.messages['Odometry']
-        # # print(connection_in)
-        # if pos_l_old== 0:
-        #     pos_l_old = encoders.distance[0]
-        #     pos_r_old = encoders.distance[1]
-        #     psi_old = 0
-            
-        encoders_ros = Odometry()
-        encoders_ros.header.stamp = current_time
-        encoders_ros.header.frame_id = "odom"
-        rot = R.from_quat([0, 0, magneto_ros.pose.pose.orientation.z, magneto_ros.pose.pose.orientation.w])
-        [psi,_,_] = rot.as_euler("zyx", degrees = False)
         
-        # Integration of psi based on encoder positions
-        pos_l_new = encoders.distance[0]
-        pos_r_new = encoders.distance[1]
-        # currentT = (float)encoders_ros.header.stamp
-        # deltaT = currentT - oldT
-        # oldT = currentT
-        deltaPos_l = pos_l_new-pos_l_old
-        deltaPos_r = pos_r_new-pos_r_old
-        psi_new = psi_old + (1/B)*(deltaPos_r-deltaPos_l)  # Rad
-        VR = deltaPos_r
-        VL = deltaPos_l
-        pos_l_old = pos_l_new
-        pos_r_old = pos_r_new
-        psi_old = psi_new
-
-        # if (x_0 == 0) and (y_0 == 0):
-        #     x_0 = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new)
-        #     y_0 = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new)
-
-        # encoders_ros.pose.pose.position.x = (encoders.distance[0]+encoders.distance[1])/2*cos(psi_new) #-x_0
-        # encoders_ros.pose.pose.position.y = (encoders.distance[0]+encoders.distance[1])/2*sin(psi_new) #-y_0
-        encoders_ros.pose.pose.position.x = x_0 + (VR+VL)/2*cos(psi_new)
-        encoders_ros.pose.pose.position.y = y_0 + (VR+VL)/2*sin(psi_new)
-        x_0 = encoders_ros.pose.pose.position.x
-        y_0 = encoders_ros.pose.pose.position.y
-        print('Psi value from frdm', psi_new*180/pi, encoders_ros.pose.pose.position.x, encoders_ros.pose.pose.position.y, (encoders.distance[0]+encoders.distance[1]), x_0, y_0)
-        # encoders_ros.pose.pose.position.y = 0
-        pub_enc.publish(encoders_ros)
         rate.sleep()
 
 if __name__ == '__main__':
