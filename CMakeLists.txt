@@ -166,6 +166,7 @@ catkin_install_python(PROGRAMS
   src/data_fused_receiver.py
   src/quat2eul_converter.py
   src/quat2eul_converter_sim.py
+  src/manual_pub.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
